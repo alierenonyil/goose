@@ -27,6 +27,7 @@ use super::{
     kimicode::KimiCodeProvider,
     litellm::LiteLLMProvider,
     nanogpt::NanoGptProvider,
+    onysoft::OnysoftProvider,
     pi_acp::PiAcpProvider,
     provider_registry::ProviderRegistry,
     snowflake_def::SnowflakeProviderDef,
@@ -157,6 +158,8 @@ async fn init_registry() -> RwLock<ProviderRegistry> {
             true,
             Some(registrations::ollama_inventory()),
         );
+        registry
+            .register_with_inventory::<OnysoftProvider>(false, Some(registrations::refresh_only()));
         registry.register_with_inventory::<OpenAiProviderDef>(
             true,
             Some(registrations::openai_inventory()),
@@ -351,6 +354,26 @@ mod tests {
             .config_keys
             .iter()
             .any(|key| key.name == "GONDOLA_API_KEY" && key.secret));
+    }
+
+    #[tokio::test]
+    async fn test_onysoft_provider_registry_wiring() {
+        let onysoft = get_from_registry("onysoft")
+            .await
+            .expect("onysoft provider should be registered");
+        let meta = onysoft.metadata();
+
+        assert_eq!(meta.name, "onysoft");
+        assert_eq!(meta.display_name, "Onysoft");
+        assert_eq!(meta.default_model, "anthropic/claude-sonnet-5.5");
+        assert!(meta
+            .config_keys
+            .iter()
+            .any(|key| key.name == "ONYSOFT_API_KEY" && key.secret && key.required));
+        assert!(
+            meta.setup.is_some(),
+            "onysoft must carry setup metadata so it appears in the provider setup catalog"
+        );
     }
 
     #[tokio::test]
@@ -560,6 +583,7 @@ mod tests {
             "kimi_code",
             "muse_code",
             "nano-gpt",
+            "onysoft",
             "tetrate",
             "xai",
             "xai_oauth",

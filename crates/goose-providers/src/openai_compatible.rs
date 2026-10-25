@@ -52,6 +52,13 @@ impl OpenAiCompatibleProvider {
         self
     }
 
+    /// The client this provider talks to. Providers that wrap `OpenAiCompatibleProvider` to add
+    /// behaviour of their own use it to reach other endpoints on the same host without building
+    /// a second client.
+    pub fn api_client(&self) -> &ApiClient {
+        &self.api_client
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn build_request_for_model(
         &self,
