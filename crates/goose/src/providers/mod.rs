@@ -65,6 +65,7 @@ pub mod ollama {
 }
 pub mod ollama_cloud;
 pub mod ollama_def;
+pub mod onysoft;
 pub mod openai {
     pub use goose_providers::openai::*;
 }
